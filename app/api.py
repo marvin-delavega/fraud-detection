@@ -9,6 +9,13 @@ from pydantic import BaseModel
 from app.application import CustomPostgresFactory, PaymentApplication
 from app.domain import Payment, EntryMode
 
+root_router = APIRouter()
+
+
+@root_router.head("/")
+async def health_check_head():
+    return {"status": "healthy"}
+
 event_router = APIRouter(prefix="/events", tags=["events"])
 
 
