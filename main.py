@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from dotenv import load_dotenv
-from app.api import event_router, payment_router, health_router
+from app.api import event_router, payment_router, health_router, root_router
 from app.application import PaymentApplication
 
 # Load environment variables from .env file
@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI):
     state_module.main_app = None
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(root_router)
 app.include_router(event_router)
 app.include_router(payment_router)
 app.include_router(health_router)
