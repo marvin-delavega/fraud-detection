@@ -83,5 +83,5 @@ async def process_payment(request: ProcessPaymentRequest = Body(), app: PaymentA
         entry_mode=EntryMode.CONTACTLESS,
         mcc="1234"
     )
-    app.save(payment)
+    app.request_payment(payment)
     return payment

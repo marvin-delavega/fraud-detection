@@ -85,7 +85,7 @@ class PaymentApplication(Application[UUID]):
         for enum in enums_to_register:
             transcoder.register(CustomEnumTranscoding(enum))
 
-    def process_payment(
+    def create_payment(
         self,
         id: UUID,
         timestamp: datetime,
@@ -104,8 +104,8 @@ class PaymentApplication(Application[UUID]):
         three_ds_result: ThreeDSResult = ThreeDSResult.NOT_ATTEMPTED,
         cavv: str | None = None,
         eci: str | None = None,
-    ):
-        payment = Payment(
+    ) -> Payment:
+        return Payment(
             id=id,
             timestamp=timestamp,
             amount=amount,
@@ -124,4 +124,7 @@ class PaymentApplication(Application[UUID]):
             cavv=cavv,
             eci=eci
         )
+
+    def request_payment(self, payment: Payment):
+        payment.request()
         self.save(payment)
