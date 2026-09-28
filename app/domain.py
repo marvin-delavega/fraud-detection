@@ -26,7 +26,7 @@ class CardLevel(Enum):
 
 
 class CreditCard(Aggregate):
-
+    @event('CreditCardCreated')
     def __init__(
         self,
         card_number: str,
@@ -60,6 +60,7 @@ class CreditCard(Aggregate):
 
 class Merchant(Aggregate):
 
+    @event('MerchantCreated')
     def __init__(
         self,
         id: UUID,
@@ -110,6 +111,7 @@ class RiskTier(Enum):
 
 class Customer(Aggregate):
 
+    @event('CustomerCreated')
     def __init__(
         self,
         user_id: UUID,
@@ -154,6 +156,8 @@ class ThreeDSResult(Enum):
 
 
 class Payment(Aggregate):
+
+    @event('PaymentCreated')
     def __init__(
         self,
         id: UUID,
