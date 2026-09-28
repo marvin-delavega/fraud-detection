@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
+import time
 from uuid import UUID
 
 from fastapi.datastructures import Address
@@ -153,7 +154,6 @@ class ThreeDSResult(Enum):
 
 
 class Payment(Aggregate):
-    @event('PaymentCreated')
     def __init__(
         self,
         id: UUID,
@@ -190,3 +190,20 @@ class Payment(Aggregate):
         self.three_ds_result = three_ds_result
         self.cavv = cavv
         self.eci = eci
+
+    @event('PaymentRequested')
+    def request(self):
+        self.three_ds_result = ThreeDSResult.ATTEMPTED
+
+        # Simulate authentication
+        time.sleep(0.5)
+
+        self.approve()
+
+    @event('PaymentApproved')
+    def approve(self):
+        self.three_ds_result = ThreeDSResult.AUTHENTICATED
+
+    @event('PaymentDeclined')
+    def decline(self):
+        self.three_ds_result = ThreeDSResult.FAILED
