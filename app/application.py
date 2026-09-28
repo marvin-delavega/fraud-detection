@@ -127,4 +127,6 @@ class PaymentApplication(Application[UUID]):
 
     def request_payment(self, payment: Payment):
         payment.request()
+        payment.approve()
+
         self.save(payment)
