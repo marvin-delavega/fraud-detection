@@ -67,8 +67,10 @@ payment_router = APIRouter(prefix="/payments", tags=["payments"])
 class ProcessPaymentRequest(BaseModel):
     amount: Decimal
     currency: str
+    customer_id: UUID
     card_number: str
     merchant_id: UUID
+    entry_mode: EntryMode
 
 
 @payment_router.post("/")
@@ -78,9 +80,10 @@ async def process_payment(request: ProcessPaymentRequest = Body(), app: PaymentA
         timestamp=datetime.now(),
         amount=request.amount,
         currency=request.currency,
+        customer_id=request.customer_id,
         card_number=request.card_number,
         merchant_id=request.merchant_id,
-        entry_mode=EntryMode.CONTACTLESS,
+        entry_mode=request.entry_mode,
         mcc="1234"
     )
     app.request_payment(payment)
