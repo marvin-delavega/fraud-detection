@@ -3,8 +3,6 @@ from typing import Any, Callable
 
 from eventsourcing.application import Application
 from uuid import UUID
-from datetime import datetime
-from decimal import Decimal
 
 from eventsourcing.persistence import AggregateRecorder, ApplicationRecorder, InfrastructureFactory, JSONTranscoder
 from eventsourcing.postgres import PostgresAggregateRecorder, PostgresApplicationRecorder, PostgresFactory
@@ -85,48 +83,12 @@ class PaymentApplication(Application[UUID]):
         for enum in enums_to_register:
             transcoder.register(CustomEnumTranscoding(enum))
 
-    def create_payment(
-        self,
-        id: UUID,
-        timestamp: datetime,
-        amount: Decimal,
-        currency: str,
-        card_number: str,
-        merchant_id: UUID,
-        entry_mode: EntryMode,
-        mcc: str,
-        pos_condition_code: str | None = None,
-        ip_address: str | None = None,
-        device_fingerprint: str | None = None,
-        email: str | None = None,
-        billing_address: str | None = None,
-        shipping_address: str | None = None,
-        three_ds_result: ThreeDSResult = ThreeDSResult.NOT_ATTEMPTED,
-        cavv: str | None = None,
-        eci: str | None = None,
-    ) -> Payment:
-        return Payment(
-            id=id,
-            timestamp=timestamp,
-            amount=amount,
-            currency=currency,
-            card_number=card_number,
-            merchant_id=merchant_id,
-            entry_mode=entry_mode,
-            mcc=mcc,
-            pos_condition_code=pos_condition_code,
-            ip_address=ip_address,
-            device_fingerprint=device_fingerprint,
-            email=email,
-            billing_address=billing_address,
-            shipping_address=shipping_address,
-            three_ds_result=three_ds_result,
-            cavv=cavv,
-            eci=eci
-        )
-
     def request_payment(self, payment: Payment):
         payment.request()
-        payment.approve()
+
+        if not payment.validate():
+            payment.decline()
+        else:
+            payment.approve()
 
         self.save(payment)

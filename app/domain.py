@@ -163,6 +163,7 @@ class Payment(Aggregate):
         timestamp: datetime,
         amount: Decimal,
         currency: str,
+        customer_id: UUID,
         card_number: str,
         merchant_id: UUID,
         entry_mode: EntryMode,
@@ -176,10 +177,12 @@ class Payment(Aggregate):
         three_ds_result: ThreeDSResult = ThreeDSResult.NOT_ATTEMPTED,
         cavv: str | None = None,
         eci: str | None = None,
+        decline_reason: str | None = None,
     ):
         self.timestamp = timestamp
         self.amount = amount
         self.currency = currency
+        self.customer_id = customer_id
         self.card_number = card_number
         self.merchant_id = merchant_id
         self.entry_mode = entry_mode
@@ -193,6 +196,7 @@ class Payment(Aggregate):
         self.three_ds_result = three_ds_result
         self.cavv = cavv
         self.eci = eci
+        self.decline_reason = decline_reason
 
     @event('PaymentRequested')
     def request(self):
@@ -205,3 +209,28 @@ class Payment(Aggregate):
     @event('PaymentDeclined')
     def decline(self):
         self.three_ds_result = ThreeDSResult.FAILED
+
+    def validate(self) -> bool:
+
+        if self.amount <= 0:
+            self.decline_reason = "Payment amount must be greater than zero."
+        if not self.currency:
+            self.decline_reason = "Currency must be specified."
+        if not self.customer_id:
+            self.decline_reason = "Customer ID must be specified."
+        if not self.card_number:
+            self.decline_reason = "Card number must be specified."
+        if not self.merchant_id:
+            self.decline_reason = "Merchant ID must be specified."
+        if not self.entry_mode:
+            self.decline_reason = "Entry mode must be specified."
+        if not self.mcc:
+            self.decline_reason = "MCC (Merchant Category Code) must be specified."
+
+        if not self.entry_mode == EntryMode.CNP:
+            self.decline_reason = "Entry mode must be CNP for this payment type."
+
+        if self.decline_reason:
+            return False
+
+        return True

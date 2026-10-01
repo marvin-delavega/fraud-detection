@@ -1,17 +1,4 @@
-// import "@supabase/functions-js/edge-runtime.d.ts";
-// import { withSupabase } from "@supabase/server";
-// import { createClient } from "@supabase/supabase-js";
 import { UUID } from "node:crypto";
-
-// const url = Deno.env.get("SUPABASE_URL") ?? "";
-// const key = Deno.env.get("SUPABASE_KEY") ?? "";
-
-// const supabase = createClient(
-//   url,
-//   key,
-// );
-
-type bytea = `\\x${string}`;
 
 interface WebhookPayload {
   type: "INSERT";
@@ -20,7 +7,7 @@ interface WebhookPayload {
     originator_id: UUID;
     originator_version: number;
     topic: string;
-    state: bytea;
+    state: string;
     notification_id: number;
   };
   schema: string;
