@@ -64,21 +64,28 @@ export default {
     );
 
     for (const message of messages) {
-      const event: Event = JSON.parse(message.message);
-      console.log(`Processing event: ${JSON.stringify(event)}`);
+      const msg = message as QueueMessage;
 
       // Here you can add your logic to process the event
 
-      await supabase.schema("pgmq_public").rpc("archive", {
+      const { error } = await supabase.schema("pgmq_public").rpc("archive", {
         queue_name: queue_name,
-        msg_id: message.msg_id,
+        message_id: message.msg_id,
       });
 
-      console.log(`Archived message: ${message.msg_id}`);
+      if (error) {
+        console.log(`Error archiving message #${message.msg_id}`, error);
+        return Response.json(JSON.stringify({ message: error.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      console.log(`Archived message #${message.msg_id}`);
     }
 
     return Response.json(
-      JSON.stringify({ message: `Materlized ${messages.length}` }),
+      JSON.stringify({ message: `Materialized ${messages.length} messages` }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
